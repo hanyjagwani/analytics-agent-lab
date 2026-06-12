@@ -1,6 +1,6 @@
 import pytest
 
-from project_app.metrics import average
+from project_app.metrics import average, median
 
 
 def test_average_returns_arithmetic_mean() -> None:
@@ -14,3 +14,28 @@ def test_average_accepts_decimal_values() -> None:
 def test_average_rejects_empty_input() -> None:
     with pytest.raises(ValueError, match="at least one value"):
         average([])
+
+
+def test_median_returns_middle_value_for_odd_length() -> None:
+    assert median([3, 1, 5]) == 3
+
+
+def test_median_returns_average_of_two_middle_values_for_even_length() -> None:
+    assert median([1, 2, 3, 4]) == 2.5
+
+
+def test_median_works_with_single_value() -> None:
+    assert median([5]) == 5
+
+
+def test_median_works_with_decimal_values() -> None:
+    assert median([1.5, 2.5, 3.5]) == 2.5
+
+
+def test_median_works_with_unsorted_input() -> None:
+    assert median([5, 1, 3]) == 3
+
+
+def test_median_rejects_empty_input() -> None:
+    with pytest.raises(ValueError, match="at least one value"):
+        median([])
