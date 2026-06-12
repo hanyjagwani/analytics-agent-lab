@@ -20,3 +20,6 @@ After completing the task:
 
 Do not write a report-only change. If you cannot produce a useful project change,
 leave the repository unchanged.
+
+Before finishing, remove trailing spaces and trailing tabs from every modified
+text file. Do not leave whitespace-only lines containing spaces or tabs.

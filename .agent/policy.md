@@ -22,3 +22,6 @@ The agent must follow these rules:
 
 A trusted workflow will run tests after the edits are complete.
 Do not attempt to execute terminal commands.
+
+18. Remove trailing spaces and trailing tabs from modified text files before finishing.
+19. Do not leave whitespace-only lines containing spaces or tabs.
