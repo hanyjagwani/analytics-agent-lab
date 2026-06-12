@@ -1,29 +1,27 @@
 # Task Completion Report
 
 ## Selected Task
-- **ID**: METRICS-002
-- **Title**: Add a minimum and maximum summary helper
+- **ID**: DOCS-001
+- **Title**: Document the available metrics helpers
 
 ## Files Changed
-- `project_app/metrics.py` - Added `summarize_range()` function
-- `tests/test_metrics.py` - Added import for `summarize_range` and 5 focused tests
+- `README.md` - Added Usage section with metrics helper documentation and examples
 
 ## Summary
-Implemented the `summarize_range(values)` function that returns a dictionary with `min` and `max` keys containing the minimum and maximum values from a non-empty collection. The function raises a clear `ValueError` when given an empty collection.
+Added a comprehensive Usage section to README.md documenting the three metrics helper functions:
+- `average()`: Calculate arithmetic mean of values
+- `median()`: Calculate median with support for odd and even length collections
+- `summarize_range()`: Get min and max values as a dictionary
+
+Included practical Python examples for each function demonstrating typical usage patterns. Documentation clearly states that all functions require at least one value and raise `ValueError` on empty input.
 
 ## Test Coverage
-Added 5 focused tests covering:
-- `test_summarize_range_returns_min_and_max()` - Basic min/max calculation
-- `test_summarize_range_works_with_single_value()` - Single value edge case
-- `test_summarize_range_works_with_decimal_values()` - Decimal values support
-- `test_summarize_range_works_with_unsorted_input()` - Unsorted input handling
-- `test_summarize_range_rejects_empty_input()` - Empty input rejection
+No new tests were added or modified. Existing test suite in tests/test_metrics.py (19 tests) provides comprehensive coverage for all documented functions and matches the documented behavior.
 
 ## Review Notes
 All acceptance criteria from the backlog have been met:
-- ✓ Added a summarize_range function
-- ✓ Returns the minimum and maximum values
-- ✓ Rejects empty collection with clear ValueError
-- ✓ Added focused tests in tests/test_metrics.py
+- ✓ Added a usage section to README.md
+- ✓ Included short Python examples
+- ✓ Kept documentation consistent with implemented functions
 
-The implementation follows the existing code style and error handling patterns consistent with `average()` and `median()` functions.
+Documentation is consistent with the implemented function signatures in project_app/metrics.py, and examples are derived from the existing test cases.
