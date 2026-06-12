@@ -14,7 +14,7 @@ tasks:
   - id: METRICS-002
     title: Add a minimum and maximum summary helper
     priority: medium
-    status: todo
+    status: done
     acceptance:
       - Add a summarize_range function
       - Return the minimum and maximum values

@@ -33,3 +33,16 @@ def median(values: Iterable[float]) -> float:
         mid1 = sorted_values[n // 2 - 1]
         mid2 = sorted_values[n // 2]
         return (mid1 + mid2) / 2
+
+
+def summarize_range(values: Iterable[float]) -> dict[str, float]:
+    """Return the minimum and maximum values from a non-empty collection.
+
+    Returns a dictionary with 'min' and 'max' keys.
+    """
+    values_list = list(values)
+
+    if not values_list:
+        raise ValueError("summarize_range requires at least one value")
+
+    return {"min": min(values_list), "max": max(values_list)}
