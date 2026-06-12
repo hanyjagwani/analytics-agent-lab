@@ -1,0 +1,157 @@
+name: Daily Project Agent
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * *"
+      timezone: "America/New_York"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: daily-project-agent-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  deliver-one-task:
+    name: Deliver One Scoped Project Task
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check whether an earlier agent PR is still open
+        id: gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          open_agent_pr_count="$(
+            gh pr list \
+              --state open \
+              --json headRefName \
+              --jq '[.[] | select(.headRefName | startswith("agent/daily-"))] | length'
+          )"
+
+          if [ "$open_agent_pr_count" -gt 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "An earlier agent pull request is still open. Skipping this run."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.gate.outputs.skip == 'false'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        if: steps.gate.outputs.skip == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install GitHub Copilot CLI
+        if: steps.gate.outputs.skip == 'false'
+        run: npm install -g @github/copilot
+
+      - name: Create temporary agent branch
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          branch="agent/daily-${GITHUB_RUN_ID}"
+
+          git config user.name "daily-project-agent[bot]"
+          git config user.email "daily-project-agent[bot]@users.noreply.github.com"
+
+          git switch -c "$branch"
+
+          echo "AGENT_BRANCH=$branch" >> "$GITHUB_ENV"
+
+      - name: Run the scoped coding agent
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PERSONAL_ACCESS_TOKEN }}
+        run: |
+          copilot \
+            -p "$(cat .agent/daily_prompt.md)" \
+            -s \
+            --allow-tool='write' \
+            --no-ask-user
+
+      - name: Stage and detect proposed changes
+        id: changes
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "The agent made no changes. No pull request will be opened."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run trusted guard script
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git show HEAD:scripts/guard-agent-changes.sh > /tmp/guard-agent-changes.sh
+          chmod +x /tmp/guard-agent-changes.sh
+          /tmp/guard-agent-changes.sh
+
+      - name: Install project dependencies
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          fi
+
+          python -m pip install -r requirements-dev.txt
+
+      - name: Run trusted verification script
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git show HEAD:scripts/verify.sh > /tmp/verify.sh
+          chmod +x /tmp/verify.sh
+          /tmp/verify.sh
+
+      - name: Commit and push validated changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git commit -m "chore(agent): deliver daily scoped improvement"
+          git push --set-upstream origin "$AGENT_BRANCH"
+
+      - name: Open reviewable pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > /tmp/pull-request-body.md <<'MD'
+          ## Automated project checkpoint
+
+          The daily project agent selected one scoped backlog item, edited the
+          repository, passed the trusted guard script, and passed the trusted
+          verification script.
+
+          **Review is required before merge.**
+
+          MD
+
+          if [ -f .agent/latest-report.md ]; then
+            echo "## Agent report" >> /tmp/pull-request-body.md
+            echo "" >> /tmp/pull-request-body.md
+            cat .agent/latest-report.md >> /tmp/pull-request-body.md
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$AGENT_BRANCH" \
+            --title "Agent checkpoint: $(date -u +%F)" \
+            --body-file /tmp/pull-request-body.md

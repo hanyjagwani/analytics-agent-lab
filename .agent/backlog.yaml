@@ -1,0 +1,31 @@
+project_goal: Build a reliable Python toolkit for basic analytics workflows.
+
+tasks:
+  - id: METRICS-001
+    title: Add a median helper function
+    priority: high
+    status: todo
+    acceptance:
+      - Add a median function to project_app/metrics.py
+      - Support odd-length and even-length collections
+      - Reject an empty collection with a clear ValueError
+      - Add focused tests in tests/test_metrics.py
+
+  - id: METRICS-002
+    title: Add a minimum and maximum summary helper
+    priority: medium
+    status: todo
+    acceptance:
+      - Add a summarize_range function
+      - Return the minimum and maximum values
+      - Reject an empty collection with a clear ValueError
+      - Add focused tests
+
+  - id: DOCS-001
+    title: Document the available metrics helpers
+    priority: low
+    status: todo
+    acceptance:
+      - Add a usage section to README.md
+      - Include short Python examples
+      - Keep the documentation consistent with the implemented functions
