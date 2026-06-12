@@ -24,7 +24,7 @@ tasks:
   - id: DOCS-001
     title: Document the available metrics helpers
     priority: low
-    status: todo
+    status: done
     acceptance:
       - Add a usage section to README.md
       - Include short Python examples
