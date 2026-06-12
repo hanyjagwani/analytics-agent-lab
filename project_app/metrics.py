@@ -11,3 +11,25 @@ def average(values: Iterable[float]) -> float:
         raise ValueError("average requires at least one value")
 
     return sum(values_list) / len(values_list)
+
+
+def median(values: Iterable[float]) -> float:
+    """Return the median of a non-empty collection of numbers.
+
+    For odd-length collections, returns the middle value.
+    For even-length collections, returns the average of the two middle values.
+    """
+    values_list = list(values)
+
+    if not values_list:
+        raise ValueError("median requires at least one value")
+
+    sorted_values = sorted(values_list)
+    n = len(sorted_values)
+
+    if n % 2 == 1:
+        return sorted_values[n // 2]
+    else:
+        mid1 = sorted_values[n // 2 - 1]
+        mid2 = sorted_values[n // 2]
+        return (mid1 + mid2) / 2

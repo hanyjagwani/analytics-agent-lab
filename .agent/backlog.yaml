@@ -4,7 +4,7 @@ tasks:
   - id: METRICS-001
     title: Add a median helper function
     priority: high
-    status: todo
+    status: done
     acceptance:
       - Add a median function to project_app/metrics.py
       - Support odd-length and even-length collections
