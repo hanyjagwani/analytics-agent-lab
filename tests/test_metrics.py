@@ -1,6 +1,6 @@
 import pytest
 
-from project_app.metrics import average, median
+from project_app.metrics import average, median, summarize_range
 
 
 def test_average_returns_arithmetic_mean() -> None:
@@ -39,3 +39,28 @@ def test_median_works_with_unsorted_input() -> None:
 def test_median_rejects_empty_input() -> None:
     with pytest.raises(ValueError, match="at least one value"):
         median([])
+
+
+def test_summarize_range_returns_min_and_max() -> None:
+    result = summarize_range([1, 5, 3])
+    assert result == {"min": 1, "max": 5}
+
+
+def test_summarize_range_works_with_single_value() -> None:
+    result = summarize_range([42])
+    assert result == {"min": 42, "max": 42}
+
+
+def test_summarize_range_works_with_decimal_values() -> None:
+    result = summarize_range([1.5, 2.5, 3.5])
+    assert result == {"min": 1.5, "max": 3.5}
+
+
+def test_summarize_range_works_with_unsorted_input() -> None:
+    result = summarize_range([5, 1, 3])
+    assert result == {"min": 1, "max": 5}
+
+
+def test_summarize_range_rejects_empty_input() -> None:
+    with pytest.raises(ValueError, match="at least one value"):
+        summarize_range([])
